@@ -56,6 +56,24 @@ This project builds upon [nishtahir/antec-flux-pro-display](https://github.com/n
 - `libsensors` (provided by `lm-sensors` package)
 - Proper USB permissions (configured during installation)
 
+## Fedora Linux Installation
+
+Fedora users should build this project from source because Fedora provides `libsensors.so.4`, while the precompiled upstream binary may require a different `libsensors` ABI.
+
+### Install dependencies
+
+`sudo dnf install rust cargo lm_sensors lm_sensors-devel libusb1-devel usbutils`
+
+### Build and install
+
+`cargo build --release`
+
+`sudo install -Dm755 target/release/antec-flux-pro-display /usr/bin/antec-flux-pro-display`
+
+### Configuration
+
+Create the configuration directory with `sudo mkdir -p /etc/antec-flux-pro-display` and configure `/etc/antec-flux-pro-display/config.conf` according to your CPU and GPU sensor names. The included `install-fedora.sh` script automates the Fedora installation, configuration, udev rule, and systemd service. Run it with `./install-fedora.sh` from the repository directory.
+
 ## Installation Instructions
 
 ### 1. Set up permission to write to the display
