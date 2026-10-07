@@ -4,6 +4,8 @@
 ![License](https://img.shields.io/github/license/Reikooters/antec-flux-pro-display)
 
 A Linux application which will output your CPU and GPU temperature onto the [Antec Flux Pro](https://www.antec.com/product/case/flux-pro) case display.
+This fork is for Fedora KDE (44). Upstream release didn't work with wrong libutils version so I compiled this.
+I also automated most of the install process with a script. -TS
 
 It uses the `sensors` rust crate, which uses `libsensors`, so works with any CPU or GPU, but you will need to do some manual installation steps described below.
 
@@ -46,35 +48,50 @@ This project builds upon [nishtahir/antec-flux-pro-display](https://github.com/n
   |-------------|---------------|
   | Debian/Ubuntu | `lm-sensors`, `usbutils` |
   | Arch Linux | `lm_sensors`, `usbutils` |
-  | Fedora | `lm_sensors`, `usbutils` |
+  | Fedora | `lm_sensors`, `lm_sensors-devel`, `libusb1-devel`, `usbutils`, `rust`, `cargo` |
 
 > [!TIP]
 > The `usbutils` package isn't technically required for the application to function, it's just used during the installation steps to give you the `lsusb` command, which is used to check to ensure the case display is correctly plugged into your motherboard and recognised.
 
 ### Dependencies
 
-- `libsensors` (provided by `lm-sensors` package)
+- `libsensors` (provided by Fedora's `lm_sensors` package)
+- `lm_sensors-devel`, Rust, and Cargo when building from source
 - Proper USB permissions (configured during installation)
 
 ## Fedora Linux Installation
 
-Fedora users should build this project from source because Fedora provides `libsensors.so.4`, while the precompiled upstream binary may require a different `libsensors` ABI.
+This fork is maintained for Fedora Linux. Fedora provides `libsensors.so.4`, so the application should be built locally against Fedora's system libraries rather than using the precompiled upstream release binary.
 
-### Install dependencies
+### Automated installation
 
-`sudo dnf install rust cargo lm_sensors lm_sensors-devel libusb1-devel usbutils`
+The included `install-fedora.sh` script installs the required Fedora packages, builds the application, creates `/etc/antec-flux-pro-display/config.conf`, installs the USB udev rule, and installs and enables the systemd service.
 
-### Build and install
+From the repository directory:
 
-`cargo build --release`
+    chmod +x install-fedora.sh
+    ./install-fedora.sh
 
-`sudo install -Dm755 target/release/antec-flux-pro-display /usr/bin/antec-flux-pro-display`
+### Manual installation
 
-### Configuration
+Install the required packages:
 
-Create the configuration directory with `sudo mkdir -p /etc/antec-flux-pro-display` and configure `/etc/antec-flux-pro-display/config.conf` according to your CPU and GPU sensor names. The included `install-fedora.sh` script automates the Fedora installation, configuration, udev rule, and systemd service. Run it with `./install-fedora.sh` from the repository directory.
+    sudo dnf install rust cargo lm_sensors lm_sensors-devel libusb1-devel usbutils
+
+Build and install:
+
+    cargo build --release
+    sudo install -Dm755 target/release/antec-flux-pro-display /usr/bin/antec-flux-pro-display
+
+Create the configuration directory:
+
+    sudo mkdir -p /etc/antec-flux-pro-display
+
+Configure `sudo nano /etc/antec-flux-pro-display/config.conf` according to the sensor names reported by `sensors`.
 
 ## Installation Instructions
+
+> Fedora users: use the Fedora Linux Installation instructions above. Do not install the precompiled release binary on Fedora.
 
 ### 1. Set up permission to write to the display
 
@@ -277,10 +294,10 @@ Press Ctrl+X to quit Nano, pressing Y to say Yes to saving the file, and press E
 
 ### 3. Download the application and install the service
 
-1. Download the `antec-flux-pro-display` binary from [Releases](https://github.com/Reikooters/antec-flux-pro-display/releases). Then use `install` to copy it to `/usr/bin/antec-flux-pro-display` and make the file executable. Example:
+1. Download the `antec-flux-pro-display` binary from [Releases](https://github.com/TurkkaS/antec-flux-pro-display-fedora/releases). Then use `install` to copy it to `/usr/bin/antec-flux-pro-display` and make the file executable. Example:
 
 ```shell
-curl -L -o antec-flux-pro-display "https://github.com/Reikooters/antec-flux-pro-display/releases/download/v1.2/antec-flux-pro-display"
+curl -L -o antec-flux-pro-display "https://github.com/TurkkaS/antec-flux-pro-display-fedora/releases/download/v1.2/antec-flux-pro-display"
 sudo install antec-flux-pro-display /usr/bin/
 ```
 
@@ -379,7 +396,7 @@ sudo systemctl daemon-reload
 ### Building from Source
 
 ```shell
-git clone https://github.com/Reikooters/antec-flux-pro-display
+git clone https://github.com/TurkkaS/antec-flux-pro-display-fedora
 cd antec-flux-pro-display
 cargo build --release
 ```
